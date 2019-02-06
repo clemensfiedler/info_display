@@ -22,8 +22,8 @@ print('Clear done')
 
 
 # define fonts
-font = ImageFont.truetype('fonts/FFFFORWA.TTF', 24)
-font_large = ImageFont.truetype('fonts/FFFFORWA.TTF', 48)
+font = ImageFont.truetype('fonts/FFFFORWA.TTF', 12)
+font_large = ImageFont.truetype('fonts/FFFFORWA.TTF', 24)
 
 def display_basic_screen(end_time, loop):
     """displays basic information
@@ -38,7 +38,21 @@ def display_basic_screen(end_time, loop):
     current_time = datetime.datetime.now().strftime('%a, %d-%m-%Y %H:%M')
     drawblack.text((10, 10), current_time, font = font, fill = 0)
 
-    get_weather()
+    print('get weather')
+    try:
+        weather_response = requests.get("http://api.openweathermap.org/data/2.5/weather", params={"appid":API_weather_key, "id":API_weather_city}).json()
+        forecast_response = requests.get("http://api.openweathermap.org/data/2.5/forecast", params={"appid":API_weather_key, "id":API_weather_city}).json()
+
+        icon_link = 'http://openweathermap.org/img/w/{}.png'.format(
+                    weather_response['weather'][0]['icon'])
+        name = weather_response['weather'][0]['description']
+        temperature = weather_response['main']['temp'] - 273.15
+
+        draworange.text((10, 60), name + '{:+5.1f}C'.format(temperature),
+            font = font, fill = 0)
+
+    except:
+        print('ERROR: fetching weather failed')
 
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HOrangeimage))
 
@@ -49,25 +63,6 @@ def display_basic_screen(end_time, loop):
     else:
         epd.Clear(0xFF)
         loop.stop()
-
-def get_weather():
-
-    print('get weather')
-
-    try:
-        weather_response = requests.get("http://api.openweathermap.org/data/2.5/weather", params={"appid":API_weather_key, "id":API_weather_city}).json()
-        forecast_response = requests.get("http://api.openweathermap.org/data/2.5/forecast", params={"appid":API_weather_key, "id":API_weather_city}).json()
-
-        icon = 'http://openweathermap.org/img/w/{}.png'.format(
-                    weather_response['weather'][0]['icon'])
-        name = weather_response['weather'][0]['description']
-        temperature = weather_response['main']['temp'] - 273.15
-
-        drawblack.text((10, 60), name + ' {}C'.format(temperature),
-            font = font, fill = 0)
-
-    except:
-        print('ERROR: fetching weather failed')
 
 def turn_off():
     epd.Clear(0xFF)
