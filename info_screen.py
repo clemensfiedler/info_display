@@ -24,6 +24,7 @@ print('Clear done')
 # define fonts
 font = ImageFont.truetype('fonts/FFFFORWA.TTF', 12)
 font_large = ImageFont.truetype('fonts/FFFFORWA.TTF', 24)
+font_weather = ImageFont.truetype('fonts/artill_clean_icons.otf', 12)
 
 def display_basic_screen(end_time, loop):
     """displays basic information
@@ -48,14 +49,13 @@ def display_basic_screen(end_time, loop):
         name = weather_response['weather'][0]['description']
         temperature = weather_response['main']['temp'] - 273.15
 
-        draworange.text((10, 60), name + '{:+5.1f}C'.format(temperature),
+        drawblack.text((10, 30), name + '{:+5.1f}C'.format(temperature),
             font = font, fill = 0)
 
     except:
         print('ERROR: fetching weather failed')
 
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HOrangeimage))
-
 
     if (loop.time() + 1.0) < end_time:
         loop.call_later(5, display_basic_screen, end_time, loop)
