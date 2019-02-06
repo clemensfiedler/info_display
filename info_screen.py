@@ -61,7 +61,7 @@ def get_weather():
         icon = 'http://openweathermap.org/img/w/{}.png'.format(
                     weather_response['weather'][0]['icon'])
         name = weather_response['weather'][0]['description']
-        temperature = weather_response['main']['temp'] − 273.15
+        temperature = weather_response['main']['temp'] - 273.15
 
         drawblack.text((10, 60), name + ' {}C'.format(temperature),
             font = font, fill = 0)
