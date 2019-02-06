@@ -24,7 +24,7 @@ print('Clear done')
 # define fonts
 font = ImageFont.truetype('fonts/FFFFORWA.TTF', 12)
 font_large = ImageFont.truetype('fonts/FFFFORWA.TTF', 24)
-font_weather = ImageFont.truetype('fonts/artill_clean_icons.otf', 12)
+font_weather = ImageFont.truetype('fonts/artill_clean_icons.otf', 24)
 
 def display_basic_screen(end_time, loop):
     """displays basic information
