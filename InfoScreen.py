@@ -85,20 +85,32 @@ class InfoScreen:
 
     def get_sports(self):
         """ get information on sports schedule"""
-        print('Getting Sportschedule')
+        print('fetching sports schedule')
         link_swimming = 'https://www.sportintilburg.nl/accommodaties/drieburcht/openingstijden'
 
-        selector = '//*[@id="content"]/div[2]/section[2]/div/div[1]/div[1]/div[2]/a[1]/div'
+        selector = '//*[@id="content"]/div[2]/section[2]/div/div[1]/div[1]/div[2]/a'
+
+        sports = ''
 
         try:
+            swimming = []
             data = requests.get(link_swimming).content
             html_code = html.fromstring(data)
             res = html_code.xpath(selector)
 
-            return None
-        
+            for i in res:
+                if i[0][1].text == 'Banenzwemmen (Sportbad)':
+                   swimming.append(i[0][0].text)
+
         except:
-            return None
+            print('error: get swimming times')
+
+        if len(swimming)>0:
+            sports += 'Swimming\n' + '\n'.join(swimming)
+
+
+        return sports
+
 
     def assemble_basic_screen(self):
         """displays basic information"""
@@ -113,7 +125,7 @@ class InfoScreen:
         draworange = ImageDraw.Draw(HOrangeimage)
 
         # background #todo how to write this?
-        draworange.rectangle(((0,0,200,140)), fill=0)
+        draworange.rectangle(((0,0,200,165)), fill=0)
 
         # draw time
         now = datetime.datetime.now()
@@ -121,19 +133,29 @@ class InfoScreen:
         drawblack.text((10, 10), now.strftime('%d %a'),
                        font=fonts['day'], fill=0)
 
+        drawblack.text((10, 72), now.strftime('%B %Y'),
+                       font=fonts['normal'], fill=0)
         # draw weather
         weather = self.get_weather()
 
         if weather:
-            drawblack.text((10, 80), weather[0] + '{:+5.1f}C'.format(weather[1]),
+            drawblack.text((10, 90), weather[0] + '{:+5.1f}C'.format(weather[1]),
                            font=fonts['normal'], fill=0)
-            drawblack.text((10, 110), weather[2],
+            drawblack.text((10, 120), weather[2],
                            font=fonts['weather'], fill=0)
         else:
-            drawblack.text((10, 80), 'ERROR',
+            drawblack.text((10, 90), 'ERROR',
                            font=fonts['normal'], fill=0)
 
-        sports = self.get_sports()
+        #draw sports
+        text_sport = self.get_sports()
 
+        if len(text_sport)>0:
+            drawblack.text((10, 170), text_sport,
+                           font=fonts['normal'], fill=0)
+
+        else:
+            drawblack.text((10, 170), 'no sports',
+                           font=fonts['normal'], fill=0)
 
         return (HBlackimage,HOrangeimage)

@@ -2,9 +2,9 @@ from InfoScreen import InfoScreen
 
 display = InfoScreen()
 res = display.assemble_basic_screen()
-display.draw(*res)
+display.draw_test(*res)
 
-
+display.get_sports()
 #     if (loop.time() + 1.0) < end_time:
 #         loop.call_later(44, display_basic_screen, end_time, loop)
 #
@@ -25,3 +25,4 @@ display.draw(*res)
 #     loop.run_forever()
 # finally:
 #     loop.close()
+
