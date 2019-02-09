@@ -4,6 +4,7 @@ import datetime
 import asyncio
 import requests
 import json
+import lxml
 
 class InfoScreen:
 
@@ -49,6 +50,12 @@ class InfoScreen:
 
         epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HOrangeimage))
 
+    def clear(self):
+        """Clears the screen"""
+
+        self.epd.Clear(0xFF)
+        print('Cleared')
+
     def draw_test(self, HBlackimage, HOrangeimage):
         """ takes the two layers and displays them for testing"""
         HBlackimage.show()
@@ -63,7 +70,6 @@ class InfoScreen:
         try:
             weather_current = requests.get(link+"weather",params=params).json()
             weather_forecast= requests.get(link+"forecast",params=params).json()
-            print(weather_forecast)
 
             name = weather_current['weather'][0]['description']
             temp = weather_current['main']['temp'] - 273.15
@@ -77,9 +83,19 @@ class InfoScreen:
 
             return None
 
+    def get_sports(self):
+        """ get information on sports schedule"""
+        print('Getting Sportschedule')
+        link_swimming = 'https://www.sportintilburg.nl/accommodaties/drieburcht/openingstijden'
+
+        try:
+            data = requests.get(link_swimming).content
+
+
+        return None
+
     def assemble_basic_screen(self):
-        """displays basic information
-        """
+        """displays basic information"""
 
         fonts = self.fonts
 
@@ -99,10 +115,7 @@ class InfoScreen:
         drawblack.text((10, 10), now.strftime('%d %a'),
                        font=fonts['day'], fill=0)
 
-
-        current_time = now.strftime('%b %Y %H:%M')
-        drawblack.text((10, 60), current_time, font = fonts['normal'], fill = 0)
-
+        # draw weather
         weather = self.get_weather()
 
         if weather:
@@ -113,6 +126,8 @@ class InfoScreen:
         else:
             drawblack.text((10, 80), 'ERROR',
                            font=fonts['normal'], fill=0)
+
+        sports = self.get_sports()
 
 
         return (HBlackimage,HOrangeimage)
