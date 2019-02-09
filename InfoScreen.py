@@ -4,7 +4,7 @@ import datetime
 import asyncio
 import requests
 import json
-import lxml
+from lxml import html
 
 class InfoScreen:
 
@@ -88,11 +88,17 @@ class InfoScreen:
         print('Getting Sportschedule')
         link_swimming = 'https://www.sportintilburg.nl/accommodaties/drieburcht/openingstijden'
 
+        selector = '//*[@id="content"]/div[2]/section[2]/div/div[1]/div[1]/div[2]/a[1]/div'
+
         try:
             data = requests.get(link_swimming).content
+            html_code = html.fromstring(data)
+            res = html_code.xpath(selector)
 
-
-        return None
+            return None
+        
+        except:
+            return None
 
     def assemble_basic_screen(self):
         """displays basic information"""
