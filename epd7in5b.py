@@ -195,21 +195,21 @@ class EPD:
             temp2 = imagered[i]
             j = 0
             while (j < 8):
-                if ((temp2 & 0x80) == 0x00):
-                    temp3 = 0x04                #red
-                elif ((temp1 & 0x80) == 0x00):
-                    temp3 = 0x00                #black
+                if   ((temp1 & 0x80) == 0x00):
+                    temp3 = 0x00               #black
+                elif ((temp2 & 0x80) == 0x00):
+                    temp3 = 0x04               #orange
                 else:
-                    temp3 = 0x03                #white
+                    temp3 = 0x03               #white
 					
                 temp3 = (temp3 << 4) & 0xFF
                 temp1 = (temp1 << 1) & 0xFF
                 temp2 = (temp2 << 1) & 0xFF
                 j += 1
-                if((temp2 & 0x80) == 0x00):
-                    temp3 |= 0x04              #red
-                elif ((temp1 & 0x80) == 0x00):
+                if   ((temp1 & 0x80) == 0x00):
                     temp3 |= 0x00              #black
+                elif ((temp2 & 0x80) == 0x00):
+                    temp3 |= 0x04              #orange
                 else:
                     temp3 |= 0x03              #white
                 temp1 = (temp1 << 1) & 0xFF
