@@ -18,7 +18,7 @@ from google.auth.transport.requests import Request
 
 class InfoScreen:
 
-    def __init__(self):
+    def __init__(self,test=True):
 
         # read settings
         with open('settings.json') as f:
@@ -43,17 +43,20 @@ class InfoScreen:
         self.cal_pos_v = 250
 
         # initialize the screen
-        try:
-            import epd7in5b
-            self.epd = epd7in5b.EPD()
-            self.epd.init()
-            self.epd.Clear(0xFF)
-            self.epd_width = epd7in5b.EPD_WIDTH  # 640
-            self.epd_height = epd7in5b.EPD_HEIGHT  # 384
-            print('screen cleared, ready to use')
+        if not test:
+            try:
+                import epd7in5b
+                self.epd = epd7in5b.EPD()
+                self.epd.init()
+                self.epd.Clear(0xFF)
+                self.epd_width = epd7in5b.EPD_WIDTH  # 640
+                self.epd_height = epd7in5b.EPD_HEIGHT  # 384
+                print('screen cleared, ready to use')
 
-        except:
-            print('failed to initialize screen')
+            except:
+                print('failed to initialize screen')
+
+        else:
             self.epd_width = 640
             self.epd_height = 384
 
@@ -206,7 +209,6 @@ class InfoScreen:
 
             for day in days:
                 days[day].sort(key=lambda tup: tup[0])
-
 
             # Sort
             sorted_days = {}
