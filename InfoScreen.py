@@ -28,9 +28,9 @@ class InfoScreen:
 
         # load fonts
         self.fonts = {
-            'normal' : ImageFont.truetype('fonts/tahoma.TTF', 12),
-            'large'  : ImageFont.truetype('fonts/tahoma.TTF', 24),
-            'day'    : ImageFont.truetype('fonts/tahoma.TTF', 40),
+            'normal' : ImageFont.truetype('fonts/tahoma.ttf', 12),
+            'large'  : ImageFont.truetype('fonts/tahoma.ttf', 24),
+            'day'    : ImageFont.truetype('fonts/tahoma.ttf', 40),
             'weather': ImageFont.truetype('fonts/meteocons.ttf', 32)
         }
 
@@ -39,7 +39,7 @@ class InfoScreen:
             self.weather_icon_table = json.load(f)
 
         # initialize the screen
-        try:
+        try:S
             import epd7in5b
             self.epd = epd7in5b.EPD()
             self.epd.init()
