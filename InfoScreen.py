@@ -11,6 +11,7 @@ import numpy as np
 
 import pickle
 import os.path
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -39,7 +40,7 @@ class InfoScreen:
             self.weather_icon_table = json.load(f)
 
         # initialize the screen
-        try:S
+        try:
             import epd7in5b
             self.epd = epd7in5b.EPD()
             self.epd.init()
