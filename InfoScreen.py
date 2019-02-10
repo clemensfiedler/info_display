@@ -1,10 +1,19 @@
-from PIL import Image,ImageDraw,ImageFont
+from __future__ import print_function
 
-import datetime
+from PIL import Image,ImageDraw,ImageFont,ImageChops
+
+import datetime as dt
 import asyncio
 import requests
 import json
 from lxml import html
+import numpy as np
+
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 class InfoScreen:
 
@@ -19,9 +28,9 @@ class InfoScreen:
 
         # load fonts
         self.fonts = {
-            'normal' : ImageFont.truetype('fonts/FFFFORWA.TTF', 12),
-            'large'  : ImageFont.truetype('fonts/FFFFORWA.TTF', 24),
-            'day'    : ImageFont.truetype('fonts/FFFFORWA.TTF', 40),
+            'normal' : ImageFont.truetype('fonts/tahoma.TTF', 12),
+            'large'  : ImageFont.truetype('fonts/tahoma.TTF', 24),
+            'day'    : ImageFont.truetype('fonts/tahoma.TTF', 40),
             'weather': ImageFont.truetype('fonts/meteocons.ttf', 32)
         }
 
@@ -44,6 +53,27 @@ class InfoScreen:
             self.epd_width = 640
             self.epd_height = 384
 
+        # set up google calendar:
+        self.calendar_list = settings['calendars']
+
+        creds = None
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', SCOPES)
+                creds = flow.run_local_server()
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
+        self.service = build('calendar', 'v3', credentials=creds)
+
     def draw(self, HBlackimage, HOrangeimage):
         """ takes the two layers and displays them"""
         epd = self.epd
@@ -58,8 +88,25 @@ class InfoScreen:
 
     def draw_test(self, HBlackimage, HOrangeimage):
         """ takes the two layers and displays them for testing"""
-        HBlackimage.show()
-        HOrangeimage.show()
+
+        im = HOrangeimage
+        im = im.convert('RGBA')
+
+        data = np.array(im)  # "data" is a height x width x 4 numpy array
+        red, green, blue, alpha = data.T  # Temporarily unpack the bands for readability
+
+        # Replace white with red... (leaves alpha values alone...)
+        white_areas = (red == 0) & (blue == 0) & (green == 0)
+        data[..., :-1][white_areas.T] = (243, 199, 87)
+
+        im2 = Image.fromarray(data)
+
+        im3 = HBlackimage
+        im3 = im3.convert('RGBA')
+
+        final = ImageChops.multiply(im3,im2)
+        final.show()
+
 
     def get_weather(self):
         """ downloads information on weather"""
@@ -111,6 +158,53 @@ class InfoScreen:
 
         return sports
 
+    def get_calendar(self):
+        #todo get all calendars
+
+        SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+
+        now = dt.datetime.utcnow().isoformat() + 'Z'
+        print('Getting the upcoming 10 events')
+
+        days = {}
+        for calendarId in self.calendar_list:
+
+            events_result = self.service\
+                .events().list(calendarId=calendarId, timeMin=now,
+                               maxResults=10, singleEvents=True,
+                               orderBy='startTime').execute()
+
+            events = events_result.get('items', [])
+
+            if not events:
+                print('No upcoming events found.')
+
+
+            for event in events:
+
+                start = event['start'].get('dateTime',
+                                           event['start'].get('date'))
+
+                day = dt.datetime.strptime(start[0:10],'%Y-%m-%d')
+                day = dt.datetime.strftime(day,'%d %B')
+
+                time = '.day'
+
+                if len(start)>10:
+                    time = dt.datetime.strptime(start[10:],'T%H:%M:%S+01:00')
+                    time = dt.datetime.strftime(time,'%H:%M')
+                else:
+                    time = '.day'
+
+                if day in days:
+                    days[day].append((time, event['summary']))
+                else:
+                    days[day] = [(time, event['summary'])]
+
+            for day in days:
+                days[day].sort(key=lambda tup: tup[0])
+
+        return days
 
     def assemble_basic_screen(self):
         """displays basic information"""
@@ -128,7 +222,7 @@ class InfoScreen:
         draworange.rectangle(((0,0,200,165)), fill=0)
 
         # draw time
-        now = datetime.datetime.now()
+        now = dt.datetime.now()
 
         drawblack.text((10, 10), now.strftime('%d %a'),
                        font=fonts['day'], fill=0)
@@ -157,5 +251,37 @@ class InfoScreen:
         else:
             drawblack.text((10, 170), 'no sports',
                            font=fonts['normal'], fill=0)
+
+        #draw events
+        events = self.get_calendar()
+        pos = 10
+        offset = 25
+        off_bar = (-5,-5,20)
+
+
+        for day in events:
+
+            drawblack.text((300, pos), day,
+                           font=fonts['normal'], fill=0)
+
+            draworange.rectangle(((300+off_bar[0],pos+off_bar[1],
+                                   self.epd_width,pos+off_bar[2])), fill=0)
+            pos += offset
+
+            for event in events[day]:
+
+
+                if not event[0]=='.day':
+                    drawblack.text((300, pos), event[0],
+                                   font=fonts['normal'], fill=0)
+
+                drawblack.text((300+60, pos), event[1],
+                               font=fonts['normal'], fill=0)
+
+                pos += offset
+
+            if pos > self.epd_height-40:
+                break
+
 
         return (HBlackimage,HOrangeimage)

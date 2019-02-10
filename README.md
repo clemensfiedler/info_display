@@ -8,3 +8,5 @@ This project contains the code used to create an infoterminal based on raspbberr
 2. Raspbian comes preinstalled with Python and Pip. Otherwise both need to be installed
 3. The display requires the pythonpackges: libjpeg-dev(```sudo apt-get install libjpeg-dev```), pillow (```pip install Pillow```), spidev(```pip install spidev```)
 4. By default RSI is deactivated. It can be activated in the advanced settings.
+5. Get credentials for open weather
+6. Setup Google API for calendar (guide)[https://developers.google.com/calendar/quickstart/python]
