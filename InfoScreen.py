@@ -39,6 +39,9 @@ class InfoScreen:
         with open('fonts/weather_icons.json') as f:
             self.weather_icon_table = json.load(f)
 
+        # set offsets
+        self.cal_pos_v = 250
+
         # initialize the screen
         try:
             import epd7in5b
@@ -186,8 +189,7 @@ class InfoScreen:
                 start = event['start'].get('dateTime',
                                            event['start'].get('date'))
 
-                day = dt.datetime.strptime(start[0:10],'%Y-%m-%d')
-                day = dt.datetime.strftime(day,'%d %B')
+                day = start[0:10]
 
                 time = '.day'
 
@@ -205,7 +207,17 @@ class InfoScreen:
             for day in days:
                 days[day].sort(key=lambda tup: tup[0])
 
-        return days
+
+            # Sort
+            sorted_days = {}
+            for key in sorted(days.keys()):
+
+                day = key
+                day = dt.datetime.strptime(day, '%Y-%m-%d')
+                day = dt.datetime.strftime(day, '%d %B')
+                sorted_days[day] = days[key]
+
+        return sorted_days
 
     def assemble_basic_screen(self):
         """displays basic information"""
@@ -255,31 +267,39 @@ class InfoScreen:
 
         #draw events
         events = self.get_calendar()
-        pos = 10
-        offset = 25
+
+        pos_v = self.cal_pos_v
+        pos = 5
+        off_day = 25
         off_bar = (-5,-5,20)
+        off_event = 20
+
 
 
         for day in events:
+            pos += 5
 
-            drawblack.text((300, pos), day,
+            drawblack.text((pos_v-off_bar[0], pos), day,
                            font=fonts['normal'], fill=0)
 
-            draworange.rectangle(((300+off_bar[0],pos+off_bar[1],
+            draworange.rectangle(((pos_v, pos+off_bar[1],
                                    self.epd_width,pos+off_bar[2])), fill=0)
-            pos += offset
+            pos += off_day
 
             for event in events[day]:
 
 
                 if not event[0]=='.day':
-                    drawblack.text((300, pos), event[0],
+                    drawblack.text((pos_v+20, pos), event[0],
                                    font=fonts['normal'], fill=0)
 
-                drawblack.text((300+60, pos), event[1],
+                drawblack.text((pos_v+60, pos), event[1],
                                font=fonts['normal'], fill=0)
 
-                pos += offset
+                pos += off_event
+
+                if pos > self.epd_height-off_day:
+                    break
 
             if pos > self.epd_height-40:
                 break
