@@ -20,6 +20,8 @@ class InfoScreen:
 
     def __init__(self,test=False):
 
+        self.test = test
+
         # read settings
         with open('settings.json') as f:
             settings = json.load(f)
@@ -52,6 +54,7 @@ class InfoScreen:
                 self.epd_width = epd7in5b.EPD_WIDTH  # 640
                 self.epd_height = epd7in5b.EPD_HEIGHT  # 384
                 print('screen cleared, ready to use')
+                print('----------------------------')
 
             except:
                 print('failed to initialize screen')
@@ -210,20 +213,11 @@ class InfoScreen:
                 else:
                     days[day] = [(start,end, event['summary'])]
 
-            print(event['end'])
-            for day in days:
-                days[day].sort(key=lambda tup: tup[0])
+        for day in days.keys():
 
-            # Sort
-        sorted_days = {}
-        for key in sorted(days.keys()):
+            days[day].sort(key=lambda tup: tup[0])
 
-            day = key
-            day = dt.datetime.strptime(day, '%Y-%m-%d')
-            day = dt.datetime.strftime(day, '%d %B')
-            sorted_days[day] = days[key]
-
-        return sorted_days
+        return days
 
     def assemble_basic_screen(self):
         """displays basic information"""
@@ -281,10 +275,13 @@ class InfoScreen:
         off_event = 20
         len_text = 51
 
-        for day in events:
+        for day in sorted(events.keys()):
             pos += 5
 
-            drawblack.text((pos_v-off_bar[0], pos), day,
+            day_name = dt.datetime.strptime(day, '%Y-%m-%d')
+            day_name = dt.datetime.strftime(day_name, '%d %B')
+
+            drawblack.text((pos_v-off_bar[0], pos), day_name,
                            font=fonts['normal'], fill=0)
 
             draworange.rectangle(((pos_v, pos+off_bar[1],
