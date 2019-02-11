@@ -1,10 +1,12 @@
 from InfoScreen import InfoScreen
 
 display = InfoScreen(test=True)
-res = display.assemble_basic_screen()
+display.start_service(refresh=1, time_end=5)
 
-cal = display.get_calendar()
-display.draw_test(*res)
+# res = display.assemble_basic_screen()
+#
+# cal = display.get_calendar()
+# display.draw_test(*res)
 
 
 

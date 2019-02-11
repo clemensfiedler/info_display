@@ -3,7 +3,7 @@ from __future__ import print_function
 from PIL import Image,ImageDraw,ImageFont,ImageChops
 
 import datetime as dt
-import asyncio
+import sched, time
 import requests
 import json
 from lxml import html
@@ -84,6 +84,31 @@ class InfoScreen:
 
         self.service = build('calendar', 'v3', credentials=creds)
 
+        # start scheduler
+        self.time_startup = time.time()
+        self.s = sched.scheduler(time.time, time.sleep)
+
+    def start_service(self, refresh = 60, time_end = 360):
+        """continuously updates screen"""
+
+        self.epd.init()
+
+        res = self.assemble_basic_screen()
+        self.draw(*res)
+
+        if time.time() > self.time_startup + time_end:
+            print('finished, end time reached')
+
+            return None
+
+        else:
+
+            self.epd.sleep()
+
+            self.s.enter(refresh, time_end,
+                         self.start_service, kwargs={'refresh': refresh, 'time_end': time_end})
+            self.s.run()
+
     def draw(self, HBlackimage, HOrangeimage):
         """ takes the two layers and displays them"""
         epd = self.epd
@@ -116,7 +141,6 @@ class InfoScreen:
 
         final = ImageChops.multiply(im3,im2)
         final.show()
-
 
     def get_weather(self):
         """ downloads information on weather"""
