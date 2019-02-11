@@ -18,7 +18,7 @@ from google.auth.transport.requests import Request
 
 class InfoScreen:
 
-    def __init__(self,test=True):
+    def __init__(self,test=False):
 
         # read settings
         with open('settings.json') as f:
