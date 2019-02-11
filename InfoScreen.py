@@ -166,7 +166,6 @@ class InfoScreen:
         return sports
 
     def get_calendar(self):
-        #todo get all calendars
 
         SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -191,33 +190,38 @@ class InfoScreen:
 
                 start = event['start'].get('dateTime',
                                            event['start'].get('date'))
-
+                end = event['end'].get('dateTime',
+                                           event['start'].get('date'))
                 day = start[0:10]
 
-                time = '.day'
-
                 if len(start)>10:
-                    time = dt.datetime.strptime(start[10:],'T%H:%M:%S+01:00')
-                    time = dt.datetime.strftime(time,'%H:%M')
+                    start = dt.datetime.strptime(start[10:],'T%H:%M:%S+01:00')
+                    start = dt.datetime.strftime(start,'%H:%M')
+
+                    end = dt.datetime.strptime(end[10:],'T%H:%M:%S+01:00')
+                    end = dt.datetime.strftime(end, '%H:%M')
+
                 else:
-                    time = '.day'
+                    start = '.day'
+                    end   = '.day'
 
                 if day in days:
-                    days[day].append((time, event['summary']))
+                    days[day].append((start,end, event['summary']))
                 else:
-                    days[day] = [(time, event['summary'])]
+                    days[day] = [(start,end, event['summary'])]
 
+            print(event['end'])
             for day in days:
                 days[day].sort(key=lambda tup: tup[0])
 
             # Sort
-            sorted_days = {}
-            for key in sorted(days.keys()):
+        sorted_days = {}
+        for key in sorted(days.keys()):
 
-                day = key
-                day = dt.datetime.strptime(day, '%Y-%m-%d')
-                day = dt.datetime.strftime(day, '%d %B')
-                sorted_days[day] = days[key]
+            day = key
+            day = dt.datetime.strptime(day, '%Y-%m-%d')
+            day = dt.datetime.strftime(day, '%d %B')
+            sorted_days[day] = days[key]
 
         return sorted_days
 
@@ -257,15 +261,15 @@ class InfoScreen:
                            font=fonts['normal'], fill=0)
 
         #draw sports
-        text_sport = self.get_sports()
-
-        if len(text_sport)>0:
-            drawblack.text((10, 170), text_sport,
-                           font=fonts['normal'], fill=0)
-
-        else:
-            drawblack.text((10, 170), 'no sports',
-                           font=fonts['normal'], fill=0)
+        # text_sport = self.get_sports()
+        #
+        # if len(text_sport)>0:
+        #     drawblack.text((10, 170), text_sport,
+        #                    font=fonts['normal'], fill=0)
+        #
+        # else:
+        #     drawblack.text((10, 170), 'no sports',
+        #                    font=fonts['normal'], fill=0)
 
         #draw events
         events = self.get_calendar()
@@ -275,8 +279,7 @@ class InfoScreen:
         off_day = 25
         off_bar = (-5,-5,20)
         off_event = 20
-
-
+        len_text = 51
 
         for day in events:
             pos += 5
@@ -290,12 +293,27 @@ class InfoScreen:
 
             for event in events[day]:
 
-
                 if not event[0]=='.day':
-                    drawblack.text((pos_v+20, pos), event[0],
+                    drawblack.text((pos_v+10, pos), event[0] + ' - ' + event[1],
                                    font=fonts['normal'], fill=0)
 
-                drawblack.text((pos_v+60, pos), event[1],
+                if len(event[2])>len_text:
+
+                    text_parts = event[2].split(' ')
+                    text = text_parts[0]
+                    length = 0
+
+                    for t in text_parts[1:]:
+                        if length + len(t)< len_text:
+                            text += ' ' + t
+                            length += len(t)
+                        else:
+                            break
+
+                else:
+                    text = event[2]
+
+                drawblack.text((pos_v+110, pos), text,
                                font=fonts['normal'], fill=0)
 
                 pos += off_event
@@ -305,6 +323,5 @@ class InfoScreen:
 
             if pos > self.epd_height-40:
                 break
-
 
         return (HBlackimage,HOrangeimage)
