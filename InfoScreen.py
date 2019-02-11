@@ -93,11 +93,12 @@ class InfoScreen:
 
         self.epd.init()
 
+        # print('updating content')
         res = self.assemble_basic_screen()
         self.draw(*res)
 
         if time.time() > self.time_startup + time_end:
-            print('finished, end time reached')
+            print('finished, timeout')
 
             return None
 
@@ -194,10 +195,12 @@ class InfoScreen:
 
     def get_calendar(self):
 
+        print('get calendar')
+
         SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
         now = dt.datetime.utcnow().isoformat() + 'Z'
-        print('Getting the upcoming 10 events')
+
 
         days = {}
         for calendarId in self.calendar_list:
@@ -248,14 +251,14 @@ class InfoScreen:
 
         fonts = self.fonts
 
-        print('updating basic screen')
+        print('\nupdating content\n' + '-'*16)
 
         HBlackimage = Image.new('1', (self.epd_width, self.epd_height), 255)
         HOrangeimage = Image.new('1', (self.epd_width, self.epd_height), 255)
         drawblack = ImageDraw.Draw(HBlackimage)
         draworange = ImageDraw.Draw(HOrangeimage)
 
-        # background #todo how to write this?
+        # background
         draworange.rectangle(((0,0,200,165)), fill=0)
 
         # draw time
@@ -277,17 +280,6 @@ class InfoScreen:
         else:
             drawblack.text((10, 90), 'ERROR',
                            font=fonts['normal'], fill=0)
-
-        #draw sports
-        # text_sport = self.get_sports()
-        #
-        # if len(text_sport)>0:
-        #     drawblack.text((10, 170), text_sport,
-        #                    font=fonts['normal'], fill=0)
-        #
-        # else:
-        #     drawblack.text((10, 170), 'no sports',
-        #                    font=fonts['normal'], fill=0)
 
         #draw events
         events = self.get_calendar()
