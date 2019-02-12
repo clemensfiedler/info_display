@@ -46,6 +46,10 @@ class InfoScreen:
             'weather': ImageFont.truetype('fonts/meteocons.ttf', 32)
         }
 
+        self.position = {
+            'weather' : (10, 90)
+        }
+
         # load conversion of weather icons
         with open('fonts/weather_icons.json') as f:
             self.weather_icon_table = json.load(f)
@@ -169,14 +173,17 @@ class InfoScreen:
 
         try:
             weather_current = requests.get(link+"weather",params=params).json()
-            weather_forecast= requests.get(link+"forecast",params=params).json()
+            weather_forecast= requests.get(link+"forecast",params=params).json()['list']
 
-            name = weather_current['weather'][0]['description']
-            temp = weather_current['main']['temp'] - 273.15
-            icon = weather_current['weather'][0]['icon']
-            icon = self.weather_icon_table[icon]
+            current = (weather_current['weather'][0]['description'],
+                       weather_current['main']['temp'] - 273.15,
+                       self.weather_icon_table[weather_current['weather'][0]['icon']])
 
-            return (name,temp,icon)
+            forecast = (weather_forecast[0]['weather'][0]['description'],
+                       weather_forecast[0]['main']['temp'] - 273.15,
+                       self.weather_icon_table[weather_forecast[0]['weather'][0]['icon']])
+
+            return (current, forecast)
 
         except:
             print('failed to fetch weather')
@@ -275,7 +282,7 @@ class InfoScreen:
         draworange = ImageDraw.Draw(HOrangeimage)
 
         # background
-        draworange.rectangle(((0,0,200,165)), fill=0)
+        draworange.rectangle(((5,5,200,200)), fill=0)
 
         # draw time
         now = dt.datetime.now()
@@ -288,16 +295,23 @@ class InfoScreen:
         # draw weather
         weather = self.get_weather()
 
+        pos = self.position['weather']
+
         if weather:
-            drawblack.text((10, 90), weather[0] + '{:+5.1f}C'.format(weather[1]),
+            drawblack.text(pos, weather[0][0] + '{:+5.1f}C'.format(weather[0][1]),
                            font=fonts['normal'], fill=0)
-            drawblack.text((10, 120), weather[2],
+            drawblack.text((pos[0],pos[1]+10), weather[0][2],
+                           font=fonts['weather'], fill=0)
+
+            drawblack.text((pos[0],pos[1]+40), 'Forecast\n' + weather[1][0] + '{:+5.1f}C'.format(weather[1][1]),
+                           font=fonts['normal'], fill=0)
+            drawblack.text((pos[0],pos[1]+70), weather[1][2],
                            font=fonts['weather'], fill=0)
         else:
-            drawblack.text((10, 90), 'ERROR',
+            drawblack.text(pos, 'ERROR',
                            font=fonts['normal'], fill=0)
 
-        #draw events
+        # draw events
         events = self.get_calendar()
 
         pos_v = self.cal_pos_v
