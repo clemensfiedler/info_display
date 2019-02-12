@@ -16,11 +16,20 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+import logging
+
+
+
 class InfoScreen:
 
     def __init__(self,test=False):
+        """initilizes the screen and all functions needed"""
 
+        # debugging and log file
         self.test = test
+
+        logging.basicConfig(filename="logfile.log", level=logging.WARNING,
+                            format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # read settings
         with open('settings.json') as f:
@@ -54,14 +63,21 @@ class InfoScreen:
                 self.epd_width = epd7in5b.EPD_WIDTH  # 640
                 self.epd_height = epd7in5b.EPD_HEIGHT  # 384
                 print('screen cleared, ready to use')
-                print('----------------------------')
+                print('============================')
+
+                logging.warning('screen cleared, ready to use')
 
             except:
                 print('failed to initialize screen')
+                logging.warning('failed to initialize screen')
 
         else:
             self.epd_width = 640
             self.epd_height = 384
+
+            print('using debug mode')
+            print('================')
+            logging.warning('using debug mode')
 
         # set up google calendar:
         self.calendar_list = settings['calendars']
@@ -87,6 +103,8 @@ class InfoScreen:
         # start scheduler
         self.time_startup = time.time()
         self.s = sched.scheduler(time.time, time.sleep)
+
+
 
     def start_service(self, refresh = 60, time_end = 360):
         """continuously updates screen"""
@@ -197,8 +215,6 @@ class InfoScreen:
 
         print('get calendar')
 
-        SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-
         now = dt.datetime.utcnow().isoformat() + 'Z'
 
 
@@ -250,7 +266,7 @@ class InfoScreen:
         """displays basic information"""
 
         fonts = self.fonts
-
+        logging.warning('updating content')
         print('\nupdating content\n' + '-'*16)
 
         HBlackimage = Image.new('1', (self.epd_width, self.epd_height), 255)

@@ -1,4 +1,6 @@
 settings.json
 token.pickle
 credentials.json
+
+*.log
 /.idea
