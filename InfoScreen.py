@@ -171,17 +171,24 @@ class InfoScreen:
         link = "http://api.openweathermap.org/data/2.5/"
         params ={"appid": self.API_weather_key, "id": self.API_weather_city}
 
+        dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N']
+
         try:
             weather_current = requests.get(link+"weather",params=params).json()
             weather_forecast= requests.get(link+"forecast",params=params).json()['list']
 
+
             current = (weather_current['weather'][0]['description'],
                        weather_current['main']['temp'] - 273.15,
-                       self.weather_icon_table[weather_current['weather'][0]['icon']])
+                       self.weather_icon_table[weather_current['weather'][0]['icon']],
+                       weather_current['wind']['speed'],
+                       dirs[int(weather_current['wind']['deg']//45)])
 
             forecast = (weather_forecast[0]['weather'][0]['description'],
                        weather_forecast[0]['main']['temp'] - 273.15,
-                       self.weather_icon_table[weather_forecast[0]['weather'][0]['icon']])
+                       self.weather_icon_table[weather_forecast[0]['weather'][0]['icon']],
+                       weather_forecast[0]['wind']['speed'],
+                       dirs[int(weather_forecast[0]['wind']['deg']//45)])
 
             return (current, forecast)
 
@@ -189,34 +196,6 @@ class InfoScreen:
             print('failed to fetch weather')
 
             return None
-
-    def get_sports(self):
-        """ get information on sports schedule"""
-        print('fetching sports schedule')
-        link_swimming = 'https://www.sportintilburg.nl/accommodaties/drieburcht/openingstijden'
-
-        selector = '//*[@id="content"]/div[2]/section[2]/div/div[1]/div[1]/div[2]/a'
-
-        sports = ''
-
-        try:
-            swimming = []
-            data = requests.get(link_swimming).content
-            html_code = html.fromstring(data)
-            res = html_code.xpath(selector)
-
-            for i in res:
-                if i[0][1].text == 'Banenzwemmen (Sportbad)':
-                   swimming.append(i[0][0].text)
-
-        except:
-            print('error: get swimming times')
-
-        if len(swimming)>0:
-            sports += 'Swimming\n' + '\n'.join(swimming)
-
-
-        return sports
 
     def get_calendar(self):
 
@@ -298,15 +277,23 @@ class InfoScreen:
         pos = self.position['weather']
 
         if weather:
-            drawblack.text(pos, weather[0][0] + '{:+5.1f}C'.format(weather[0][1]),
-                           font=fonts['normal'], fill=0)
-            drawblack.text((pos[0],pos[1]+10), weather[0][2],
+            drawblack.text((pos[0], pos[1] + 10), weather[0][2],
                            font=fonts['weather'], fill=0)
+            drawblack.text((pos[0]+40, pos[1]+5), weather[0][0],
+                           font=fonts['normal'], fill=0)
+            drawblack.text((pos[0]+40 ,pos[1]+20), '{:+5.1f}C  {:.1f}m/s ({})'
+                           .format(weather[0][1], weather[0][3], weather[0][4]),
+                           font=fonts['normal'], fill=0)
 
-            drawblack.text((pos[0],pos[1]+40), 'Forecast\n' + weather[1][0] + '{:+5.1f}C'.format(weather[1][1]),
+            drawblack.text((pos[0], pos[1] + 50), 'Forecast',
                            font=fonts['normal'], fill=0)
-            drawblack.text((pos[0],pos[1]+70), weather[1][2],
+            drawblack.text((pos[0], pos[1] + 68), weather[1][2],
                            font=fonts['weather'], fill=0)
+            drawblack.text((pos[0]+40, pos[1]+73), weather[1][0],
+                           font=fonts['normal'], fill=0)
+            drawblack.text((pos[0]+40, pos[1]+88), '{:+5.1f}C  {:.1f}m/s ({})'
+                           .format(weather[1][1], weather[1][3], weather[1][4]),
+                           font=fonts['normal'], fill=0)
         else:
             drawblack.text(pos, 'ERROR',
                            font=fonts['normal'], fill=0)
@@ -325,7 +312,7 @@ class InfoScreen:
             pos += 5
 
             day_name = dt.datetime.strptime(day, '%Y-%m-%d')
-            day_name = dt.datetime.strftime(day_name, '%d %B')
+            day_name = dt.datetime.strftime(day_name, '%A, %d %B')
 
             drawblack.text((pos_v-off_bar[0], pos), day_name,
                            font=fonts['normal'], fill=0)
