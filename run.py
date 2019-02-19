@@ -1,9 +1,31 @@
 from InfoScreen import InfoScreen
+from argparse import ArgumentParser
 
+
+# paste arguments
+parser = ArgumentParser()
+parser.add_argument("-r", "--refresh", dest="refresh",
+                    help="refresh time in minutes")
+parser.add_argument("-t", "--time", dest="time_end",
+                    help="runtime in hours")
+
+args = parser.parse_args()
+vargs = vars(args)
+
+try:
+    refresh = 60*vargs['refresh']
+except:
+    refresh = 60*10
+
+try:
+    time_end = 3600*vargs['time']
+except:
+    time_end = 3600*24
+
+
+# start service
 display = InfoScreen()
-display.start_service(refresh=60*10, time_end=3600*24)
 
+print('starting service\nrefresh every {} minutes\nstops in {} hours'.format(refresh, time_end))
 
-# res = display.assemble_basic_screen()
-
-# display.draw(*res)
+display.start_service(refresh=refresh, time_end=time_end)
