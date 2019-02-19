@@ -13,12 +13,12 @@ args = parser.parse_args()
 vargs = vars(args)
 
 try:
-    refresh = 60*vargs['refresh']
+    refresh = 60*int(vargs['refresh'])
 except:
     refresh = 60*10
 
 try:
-    time_end = 3600*vargs['time']
+    time_end = 3600*int(vargs['time'])
 except:
     time_end = 3600*24
 
@@ -26,6 +26,6 @@ except:
 # start service
 display = InfoScreen()
 
-print('starting service\nrefresh every {} minutes\nstops in {} hours'.format(refresh, time_end))
+print('starting service\nrefresh every {} m\nstops in {} h'.format(refresh//60, time_end//3600))
 
 display.start_service(refresh=refresh, time_end=time_end)
