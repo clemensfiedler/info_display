@@ -110,7 +110,7 @@ class InfoScreen:
 
 
 
-    def start_service(self, refresh = 60, time_end = 360):
+    def start_service(self, refresh = 60, time_end = 3600):
         """continuously updates screen"""
 
         self.epd.init()
@@ -119,10 +119,14 @@ class InfoScreen:
         res = self.assemble_basic_screen()
         self.draw(*res)
 
-        if time.time() > self.time_startup + time_end:
-            print('finished, timeout')
+        # check if done
+        if time_end > 0:
 
-            return None
+            if time.time() > self.time_startup + time_end:
+
+                print('finished, timeout')
+
+                return None
 
         else:
 

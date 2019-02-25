@@ -18,7 +18,7 @@ except:
     refresh = 60*10
 
 try:
-    time_end = 3600*int(vargs['time'])
+    time_end = 3600*int(vargs['time_end'])
 except:
     time_end = 3600*24
 
