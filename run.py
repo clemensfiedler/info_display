@@ -27,7 +27,7 @@ except:
 display = InfoScreen()
 
 print('starting service\n' + '-'*20 +
-      'refresh: {} minutes\n'+
-      'stops  : {} hours'.format(refresh//60, time_end//3600))
+      'refresh: {} minutes\nstops  : {} hours'
+      .format(refresh//60, time_end//3600))
 
 display.start_service(refresh=refresh, time_end=time_end)
