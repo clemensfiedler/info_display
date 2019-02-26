@@ -120,7 +120,7 @@ class InfoScreen:
         self.draw(*res)
 
         # check if done
-        if time_end > 0:
+        if time_end < 0:
 
             if time.time() > self.time_startup + time_end:
 
