@@ -234,7 +234,8 @@ class InfoScreen:
                     start = dt.datetime.strptime(start[10:],'T%H:%M:%S+01:00')
                     start = dt.datetime.strftime(start,'%H:%M')
 
-                    end = dt.datetime.strptime(end[10:],'T%H:%M:%S+01:00')
+                    offset = int(end[-6:-3])
+                    end = dt.datetime.strptime(end[10:-6],'T%H:%M:%S+01:00')
                     end = dt.datetime.strftime(end, '%H:%M')
 
                 else:
