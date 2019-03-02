@@ -231,11 +231,13 @@ class InfoScreen:
                 day = start[0:10]
 
                 if len(start)>10:
-                    start = dt.datetime.strptime(start[10:],'T%H:%M:%S+01:00')
+
+                    start_off = int(start[-6:-3])
+                    start = dt.datetime.strptime(start[10:-6],'T%H:%M:%S')
                     start = dt.datetime.strftime(start,'%H:%M')
 
-                    offset = int(end[-6:-3])
-                    end = dt.datetime.strptime(end[10:-6],'T%H:%M:%S+01:00')
+                    end_off = int(end[-6:-3])
+                    end = dt.datetime.strptime(end[10:-6],'T%H:%M:%S')
                     end = dt.datetime.strftime(end, '%H:%M')
 
                 else:
