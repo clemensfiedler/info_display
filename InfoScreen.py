@@ -306,7 +306,10 @@ class InfoScreen:
                            font=fonts['normal'], fill=0)
 
         # draw events
-        events = self.get_calendar()
+        try:
+            events = self.get_calendar()
+        except:
+            events = None
 
         pos_v = self.cal_pos_v
         pos = 5
