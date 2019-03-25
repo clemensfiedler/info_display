@@ -145,7 +145,7 @@ class InfoScreen:
 
         logging.warning('refreshing screen done')
 
-        self.s.enter(refresh, time_end,
+        self.s.enter(refresh, 1,
                      self.start_service, kwargs={'refresh': refresh, 'time_end': time_end})
         self.s.run()
 
