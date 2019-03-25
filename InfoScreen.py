@@ -23,7 +23,7 @@ import logging
 class InfoScreen:
 
     def __init__(self,test=False):
-        """initilizes the screen and all functions needed"""
+        """initializes the screen and all functions needed"""
 
         # debugging and log file
         self.test = test
@@ -111,7 +111,19 @@ class InfoScreen:
 
 
     def start_service(self, refresh = 60, time_end = 3600):
-        """continuously updates screen"""
+        """continuously updates screen
+
+            Parameters
+            ----------
+            refresh : numeric
+                Refresh rate in seconds. A refresh takes about 30 seconds so any number smaller than this doesn't
+                increase the refresh rate.
+            time_end : numeric
+                End time in seconds. The display terminates after running for time_end seconds. If negative the
+                display runs indefinitely.
+        """
+
+        logging.warning('refreshing screen')
 
         self.epd.init()
 
@@ -120,7 +132,7 @@ class InfoScreen:
         self.draw(*res)
 
         # check if done
-        if time_end < 0:
+        if time_end > 0:
 
             if time.time() > self.time_startup + time_end:
 
@@ -128,13 +140,14 @@ class InfoScreen:
 
                 return None
 
-        else:
 
-            self.epd.sleep()
+        self.epd.sleep()
 
-            self.s.enter(refresh, time_end,
-                         self.start_service, kwargs={'refresh': refresh, 'time_end': time_end})
-            self.s.run()
+        logging.warning('refreshing screen done')
+
+        self.s.enter(refresh, time_end,
+                     self.start_service, kwargs={'refresh': refresh, 'time_end': time_end})
+        self.s.run()
 
     def draw(self, HBlackimage, HOrangeimage):
         """ takes the two layers and displays them"""
