@@ -19,17 +19,16 @@ from google.auth.transport.requests import Request
 import logging
 
 
-
 class InfoScreen:
 
-    def __init__(self,test=False):
+    def __init__(self, test=False):
         """initializes the screen and all functions needed"""
 
         # debugging and log file
         self.test = test
 
         logging.basicConfig(filename="logfile.log", level=logging.WARNING,
-                            format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # read settings
         with open('settings.json') as f:
@@ -47,7 +46,7 @@ class InfoScreen:
         }
 
         self.position = {
-            'weather' : (10, 90)
+            'weather': (10, 100)
         }
 
         # load conversion of weather icons
@@ -95,6 +94,7 @@ class InfoScreen:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
+                SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
                 flow = InstalledAppFlow.from_client_secrets_file(
                     'credentials.json', SCOPES)
                 creds = flow.run_local_server()
@@ -191,23 +191,30 @@ class InfoScreen:
         dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N']
 
         try:
-            weather_current = requests.get(link+"weather",params=params).json()
-            weather_forecast= requests.get(link+"forecast",params=params).json()['list']
 
+            current = requests.get(link + "weather", params=params).json()
+            forecast = requests.get(link + "forecast", params=params).json()['list']
+            weather_reports = [current, forecast[0], forecast[1]]
 
-            current = (weather_current['weather'][0]['description'],
-                       weather_current['main']['temp'] - 273.15,
-                       self.weather_icon_table[weather_current['weather'][0]['icon']],
-                       weather_current['wind']['speed'],
-                       dirs[int(weather_current['wind']['deg']//45)])
+            weather_data = []
 
-            forecast = (weather_forecast[0]['weather'][0]['description'],
-                       weather_forecast[0]['main']['temp'] - 273.15,
-                       self.weather_icon_table[weather_forecast[0]['weather'][0]['icon']],
-                       weather_forecast[0]['wind']['speed'],
-                       dirs[int(weather_forecast[0]['wind']['deg']//45)])
+            for wr in weather_reports:
 
-            return (current, forecast)
+                try:
+                    timestamp = wr['dt']
+                except:
+                    timestamp = wr['main']['dt']
+                time = dt.datetime.fromtimestamp(timestamp).strftime('%H:%M')
+
+                weather_data.append(
+                    {'time': time, 'desc': wr['weather'][0]['description'],
+                     'temp': wr['main']['temp'] - 273.15,
+                     'icon': self.weather_icon_table[wr['weather'][0]['icon']],
+                     'wind_speed': wr['wind']['speed'],
+                     'wind_dir': dirs[int(wr['wind']['deg'] // 45)]}
+                )
+
+            return weather_data
 
         except:
             print('failed to fetch weather')
@@ -281,7 +288,8 @@ class InfoScreen:
         draworange = ImageDraw.Draw(HOrangeimage)
 
         # background
-        draworange.rectangle(((5,5,200,200)), fill=0)
+        draworange.rectangle((5,5,200,95), fill=0)
+        drawblack.rectangle((5, 5, 200, 95), width=2)
 
         # draw time
         now = dt.datetime.now()
@@ -297,23 +305,21 @@ class InfoScreen:
         pos = self.position['weather']
 
         if weather:
-            drawblack.text((pos[0], pos[1] + 10), weather[0][2],
-                           font=fonts['weather'], fill=0)
-            drawblack.text((pos[0]+40, pos[1]+5), weather[0][0],
-                           font=fonts['normal'], fill=0)
-            drawblack.text((pos[0]+40 ,pos[1]+20), '{:+5.1f}C  {:.1f}m/s ({})'
-                           .format(weather[0][1], weather[0][3], weather[0][4]),
-                           font=fonts['normal'], fill=0)
 
-            drawblack.text((pos[0], pos[1] + 50), 'Forecast',
-                           font=fonts['normal'], fill=0)
-            drawblack.text((pos[0], pos[1] + 68), weather[1][2],
-                           font=fonts['weather'], fill=0)
-            drawblack.text((pos[0]+40, pos[1]+73), weather[1][0],
-                           font=fonts['normal'], fill=0)
-            drawblack.text((pos[0]+40, pos[1]+88), '{:+5.1f}C  {:.1f}m/s ({})'
-                           .format(weather[1][1], weather[1][3], weather[1][4]),
-                           font=fonts['normal'], fill=0)
+            x = pos[0]
+            y = pos[1]
+            dy = 60
+
+            for i, wr in enumerate(weather):
+                drawblack.text((x, y+dy*i+5), wr['icon'], font=fonts['weather'], fill=0)
+                drawblack.text((x+40, y+dy*i), wr['time'], font=fonts['normal'], fill=0)
+                drawblack.text((x+40, y+dy*i+15), wr['desc'], font=fonts['normal'], fill=0)
+                drawblack.text((x+40, y+dy*i+30), '{:+5.1f}C  {:.1f}m/s ({})'
+                               .format(wr['temp'], wr['wind_speed'], wr['wind_dir']),
+                               font=fonts['normal'], fill=0)
+
+                drawblack.rectangle((5, y-5+dy*(i+1), 200, y-5+dy*(i+1)+1), fill=0)
+
         else:
             drawblack.text(pos, 'ERROR',
                            font=fonts['normal'], fill=0)

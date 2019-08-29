@@ -1,7 +1,6 @@
 from InfoScreen import InfoScreen
 from argparse import ArgumentParser
 
-
 # paste arguments
 parser = ArgumentParser()
 parser.add_argument("-r", "--refresh", dest="refresh",
@@ -21,7 +20,6 @@ try:
     time_end = 3600*int(vargs['time_end'])
 except:
     time_end = 3600*24
-
 
 # start service
 display = InfoScreen()
