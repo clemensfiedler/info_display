@@ -19,13 +19,19 @@ except:
 try:
     time_end = 3600*int(vargs['time_end'])
 except:
-    time_end = 3600*24
+    time_end = 3600*24*30
 
 # start service
 display = InfoScreen()
 
-print('starting service\n' + '-'*20 +
-      '\nrefresh: {} minutes\nstops  : {} hours'
-      .format(refresh//60, time_end//3600))
+print('starting service\n' + '-'*20)
+print('refresh: {} minutes'.format(refresh//60))
+
+if time_end<0:
+    print('runs indefinetly')
+if time_end>3600*2:
+    print('stops : {} days'.format(time_end//(3600*24)))
+else:
+    print('stops : {} hours'.format(time_end //3600))
 
 display.start_service(refresh=refresh, time_end=time_end)

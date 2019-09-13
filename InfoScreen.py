@@ -1,12 +1,11 @@
 from __future__ import print_function
 
-from PIL import Image,ImageDraw,ImageFont,ImageChops
+from PIL import Image, ImageDraw, ImageFont, ImageChops
 
 import datetime as dt
 import sched, time
 import requests
 import json
-from lxml import html
 import numpy as np
 
 import pickle
@@ -108,9 +107,7 @@ class InfoScreen:
         self.time_startup = time.time()
         self.s = sched.scheduler(time.time, time.sleep)
 
-
-
-    def start_service(self, refresh = 60, time_end = 3600):
+    def start_service(self, refresh=60, time_end=3600):
         """continuously updates screen
 
             Parameters
@@ -139,7 +136,6 @@ class InfoScreen:
                 print('finished, timeout')
 
                 return None
-
 
         self.epd.sleep()
 
